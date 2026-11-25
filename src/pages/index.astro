@@ -19,10 +19,13 @@ const unavailable = "Load time is unavailable.";
       <p id="measurement" hidden>
         This site loaded in{" "}<strong
           ><span id="digits" data-testid="milliseconds"></span> ms</strong
-        >.
-      </p>
-      <p id="comparison" hidden>
-        That’s faster than at least <strong id="percentile"></strong><span id="audience"></span>
+        >.<span id="comparison" hidden
+          >{" "}That’s{" "}<span id="pace"></span>faster than at least{" "}<a
+            id="percentile"
+            href={benchmark.url}
+            >Benchmark</a
+          >{" "}of sites.</span
+        >
       </p>
     </main>
     <script

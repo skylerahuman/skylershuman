@@ -10,7 +10,10 @@ type Benchmark = Partial<Record<Client, Histogram>> & {
   url: string;
 };
 
+type Comparison = { percentage: number; multiplier: number };
+
 const duration = 120;
+const tail = 2 ** -6;
 
 function measure(): number | undefined {
   const entry = performance.getEntriesByType?.("navigation")[0] as
@@ -32,31 +35,38 @@ function parseBenchmark(): Benchmark | null {
   return JSON.parse(data || "null") as Benchmark | null;
 }
 
-function compare(milliseconds: number, histogram: Histogram): number | undefined {
+function compare(milliseconds: number, histogram: Histogram): Comparison | undefined {
   let total = 0;
   let slower = 0;
+  let lowerBound: number | undefined;
   for (const [second, count] of histogram.counts.entries()) {
     total += count;
-    if (second * 1000 > milliseconds) {
+    const boundary = second * 1000;
+    if (count > 0 && boundary > milliseconds) {
+      lowerBound ??= boundary;
       slower += count;
     }
   }
-  return total > 0 ? Math.floor((100 * slower) / total) : undefined;
+  if (total === 0) {
+    return undefined;
+  }
+  return {
+    percentage: Math.floor((100 * slower) / total),
+    multiplier: lowerBound === undefined ? 0 : Math.ceil(lowerBound / milliseconds) - 1,
+  };
 }
 
-function reveal(percentage: number, client: Client, benchmark: Benchmark): void {
+function reveal(result: Comparison, client: Client, benchmark: Benchmark): void {
   const comparison = document.getElementById("comparison");
-  const percentile = document.getElementById("percentile");
-  const audience = document.getElementById("audience");
-  if (!(comparison && percentile && audience)) {
+  const source = document.querySelector<HTMLAnchorElement>("#percentile");
+  const pace = document.getElementById("pace");
+  if (!(comparison && source && pace)) {
     return;
   }
-  percentile.textContent = `${percentage}%`;
-  audience.textContent = ` of ${client} pages.`;
-  const source = document.createElement("a");
-  source.textContent = benchmark.label;
+  pace.textContent = result.multiplier >= 2 ? `${result.multiplier}× ` : "";
+  source.textContent = `${result.percentage}%`;
   source.href = benchmark.url;
-  comparison.after(source);
+  source.title = `${benchmark.label} · ${client}`;
   comparison.hidden = false;
 }
 
@@ -83,7 +93,8 @@ function count(digits: HTMLElement, from: number, to: number): void {
   function tick(now: number): void {
     const progress = Math.max(0, (now - start) / duration);
     if (progress < 1) {
-      roll(digits, Math.round(from + (to - from) * progress));
+      const remaining = (2 ** (-6 * progress) - tail) / (1 - tail);
+      roll(digits, Math.round(to + (from - to) * remaining));
       frame = requestAnimationFrame(tick);
     }
   }
@@ -116,11 +127,11 @@ export function present(): void {
   if (!(benchmark && histogram)) {
     return;
   }
-  const percentage = compare(milliseconds, histogram);
-  if (percentage === undefined) {
+  const result = compare(milliseconds, histogram);
+  if (!result) {
     return;
   }
-  reveal(percentage, client, benchmark);
+  reveal(result, client, benchmark);
   if (histogram.median > rounded && !matchMedia("(prefers-reduced-motion: reduce)").matches) {
     count(digits, histogram.median, rounded);
   }

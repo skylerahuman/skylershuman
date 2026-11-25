@@ -9,26 +9,27 @@ body {
 }
 
 main {
-  box-sizing: border-box;
-  width: min(100%, 56rem);
-  padding: 2rem clamp(1.25rem, 5vw, 4rem);
-  font-size: clamp(1.5rem, 5vw, 3.5rem);
-  line-height: 1.15;
-  letter-spacing: -0.04em;
+  width: 100%;
+  min-width: 0;
+  overflow-x: auto;
+  white-space: nowrap;
+  font-size: clamp(0.75rem, 2vw, 1rem);
+  line-height: 1.4;
 }
 
 p {
-  margin: 0;
-  text-wrap: balance;
+  width: max-content;
+  margin: 0 auto;
+  padding: 0.5rem 1rem;
 }
 
-#comparison {
-  margin-block-start: 0.3em;
-}
-
-strong {
+strong,
+a {
+  color: inherit;
   font-weight: 700;
   font-variant-numeric: tabular-nums;
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
 }
 
 #digits {
@@ -38,11 +39,4 @@ strong {
 
 #digits span {
   display: inline-block;
-}
-
-a {
-  color: inherit;
-  font-size: 0.875rem;
-  letter-spacing: normal;
-  text-underline-offset: 0.2em;
 }
