@@ -9,7 +9,7 @@
   },
   "scripts": {
     "quality": "biome ci . && node scripts/comments.mjs && node scripts/budget.mjs",
-    "quality:selftest": "node scripts/selftest.mjs",
+    "quality:selftest": "node scripts/selftest.mjs && node --experimental-strip-types --test .pi/extensions/review/review-diff.test.ts",
     "format": "biome format --write .",
     "lint": "biome lint ."
   },

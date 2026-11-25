@@ -11,6 +11,7 @@ const SURFACES = {
     roots: ["scripts", "quality"],
     accept: (path) => /\.(?:mjs|ts|grit)$/.test(path) && !path.includes("fixtures/"),
   },
+  review: { roots: [".pi/extensions"], accept: (path) => /\.[cm]?[jt]s$/.test(path) },
 };
 
 async function readBudget() {

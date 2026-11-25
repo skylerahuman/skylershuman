@@ -3,6 +3,7 @@
   "css": 300,
   "worker": 200,
   "tooling": 480,
+  "review": 230,
   "comments": {
     "tsExpectError": 0,
     "biomeIgnore": 0,
