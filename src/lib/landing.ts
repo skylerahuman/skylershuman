@@ -60,11 +60,11 @@ function reveal(result: Comparison, client: Client, benchmark: Benchmark): void 
   const comparison = document.getElementById("comparison");
   const source = document.querySelector<HTMLAnchorElement>("#percentile");
   const pace = document.getElementById("pace");
-  if (!(comparison && source && pace)) {
+  const mark = document.getElementById("factor");
+  if (!(comparison && source && pace && mark)) {
     return;
   }
-  const mark = pace.firstElementChild;
-  if (mark && result.multiplier >= 2) {
+  if (result.multiplier >= 2) {
     mark.textContent = `${result.multiplier}×`;
     pace.hidden = false;
   }

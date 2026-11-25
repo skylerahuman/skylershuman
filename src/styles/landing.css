@@ -45,13 +45,16 @@ a {
 
 .number-slot {
   display: inline-grid;
-  text-align: end;
   vertical-align: bottom;
 }
 
 .number-slot::before,
-#digits {
+.number-slot > span {
   grid-area: 1 / 1;
+}
+
+.number-slot > span {
+  justify-self: end;
 }
 
 .number-slot::before {

@@ -1,48 +1,7 @@
-import { expect, type Page, test } from "@playwright/test";
+import { expect, test } from "@playwright/test";
+import { readLanding, sample } from "./landing-fixture";
 
-const sample = {
-  label: "Benchmark fixture · October 2026",
-  url: "https://example.com/benchmark",
-  desktop: { median: 1600, counts: [2, 3, 5] },
-};
-const epoch = Date.UTC(2026, 0, 1);
 const archive = "https://httparchive.org/reports/loading-speed?start=2026_10_01#ol";
-
-async function readLanding(
-  page: Page,
-  milliseconds: number | null,
-  benchmark?: typeof sample | null,
-): Promise<void> {
-  await page.clock.install({ time: epoch });
-  await page.clock.pauseAt(epoch + 1000);
-  await page.addInitScript((start: number | null): void => {
-    const entries = performance.getEntriesByType.bind(performance);
-    const navigation = {
-      startTime: 0,
-      loadEventEnd: 8500,
-      get loadEventStart(): number {
-        return document.readyState === "complete" ? (start ?? 0) : 0;
-      },
-    };
-    const timings = (start === null ? [] : [navigation]) as PerformanceEntryList;
-    performance.getEntriesByType = (type: string): PerformanceEntryList =>
-      type === "navigation" ? timings : entries(type);
-  }, milliseconds);
-  if (benchmark !== undefined) {
-    await page.route("/", async (route): Promise<void> => {
-      const response = await route.fetch();
-      const html = await response.text();
-      await route.fulfill({
-        response,
-        body: html.replace(
-          /(<script[^>]*id="benchmark-data"[^>]*>)[\s\S]*?(<\/script>)/,
-          `$1${JSON.stringify(benchmark)}$2`,
-        ),
-      });
-    });
-  }
-  await page.goto("/");
-}
 
 test("L1, L7, L11: a narrow desktop window scrolls one readable comparison line", async ({
   page,
@@ -74,7 +33,7 @@ test("L1, L7, L11: a narrow desktop window scrolls one readable comparison line"
   ).toBe(true);
 });
 
-test("L11 and L13: the time and multiplier have separate lines, not the bold percentage", async ({
+test("L11, L13, L15: separate lines mark the time and bold multiplier only", async ({
   page,
 }): Promise<void> => {
   await page.setViewportSize({ width: 1024, height: 680 });
@@ -90,6 +49,7 @@ test("L11 and L13: the time and multiplier have separate lines, not the bold per
   const time = main.getByText("80 ms", { exact: true });
   const share = main.getByRole("link", { name: "97%" });
   const multiplier = main.getByText("12×", { exact: true });
+  await expect(multiplier).toHaveCSS("font-weight", "700");
   for (const item of [time, multiplier]) {
     await expect(item).toHaveCSS("text-decoration-line", "none");
     expect(
@@ -127,6 +87,33 @@ test("L14: the time mark and the comparison stay still as the digit count shrink
   await expect(digits).toHaveText("80");
   expect(await time.boundingBox()).toEqual(initialTime);
   expect(await share.boundingBox()).toEqual(initialShare);
+});
+
+test("L15: the bold multiplier reserves two digits and grows when needed", async ({
+  context,
+}): Promise<void> => {
+  const positions: number[] = [];
+  for (const [bucket, multiplier] of [
+    [1, "9×"],
+    [2, "19×"],
+    [11, "109×"],
+  ] as const) {
+    const page = await context.newPage();
+    const counts = Array<number>(bucket + 1).fill(0);
+    counts[0] = 2;
+    counts[bucket] = 8;
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await readLanding(page, 100, { ...sample, desktop: { ...sample.desktop, counts } });
+    await page.clock.runFor(16);
+    await expect(page.getByText(multiplier, { exact: true })).toBeVisible();
+    const share = await page.getByRole("link", { name: "80%" }).boundingBox();
+    expect(share).not.toBeNull();
+    positions.push(share?.x ?? 0);
+    await page.close();
+  }
+  const [one = 0, two = 0, three = 0] = positions;
+  expect(one).toBe(two);
+  expect(three).toBeGreaterThan(two);
 });
 
 for (const [reading, phrase] of [
