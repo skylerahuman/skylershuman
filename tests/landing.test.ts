@@ -74,7 +74,7 @@ test("L1, L7, L11: a narrow desktop window scrolls one readable comparison line"
   ).toBe(true);
 });
 
-test("L11 and L12: desktop shows the whole line and underlines the time and percentage", async ({
+test("L11 and L13: the time and multiplier have separate lines, not the bold percentage", async ({
   page,
 }): Promise<void> => {
   await page.setViewportSize({ width: 1024, height: 680 });
@@ -89,10 +89,44 @@ test("L11 and L12: desktop shows the whole line and underlines the time and perc
   await expect(main).toHaveCSS("font-size", "16px");
   const time = main.getByText("80 ms", { exact: true });
   const share = main.getByRole("link", { name: "97%" });
-  await expect(time).toHaveCSS("text-decoration-line", "underline");
-  await expect(share).toHaveCSS("text-decoration-line", "underline");
+  const multiplier = main.getByText("12×", { exact: true });
+  for (const item of [time, multiplier]) {
+    await expect(item).toHaveCSS("text-decoration-line", "none");
+    expect(
+      await item.evaluate((mark): string => getComputedStyle(mark, "::after").borderBottomStyle),
+    ).toBe("solid");
+  }
+  await expect(share).toHaveCSS("text-decoration-line", "none");
+  await expect(share).toHaveCSS("font-weight", "700");
+  await expect(share).toHaveAttribute("href", archive);
+  expect(
+    await share.evaluate((link): string => getComputedStyle(link, "::after").borderBottomStyle),
+  ).toBe("none");
   expect((await time.boundingBox())?.y).toBe((await share.boundingBox())?.y);
   expect(await main.evaluate((line): boolean => line.scrollWidth === line.clientWidth)).toBe(true);
+});
+
+test("L14: the time mark and the comparison stay still as the digit count shrinks", async ({
+  page,
+}): Promise<void> => {
+  await readLanding(page, 80);
+  const digits = page.getByTestId("milliseconds");
+  const time = page.getByText(/^\d+ ms$/);
+  const share = page.getByRole("link", { name: "97%" });
+  await page.clock.runFor(1);
+  await expect(digits).toHaveText("4650");
+  const initialTime = await time.boundingBox();
+  const initialShare = await share.boundingBox();
+  expect(initialTime).not.toBeNull();
+  expect(initialShare).not.toBeNull();
+  await page.clock.runFor(96);
+  await expect(digits).toHaveText(/^\d{3}$/);
+  expect(await time.boundingBox()).toEqual(initialTime);
+  expect(await share.boundingBox()).toEqual(initialShare);
+  await page.clock.runFor(23);
+  await expect(digits).toHaveText("80");
+  expect(await time.boundingBox()).toEqual(initialTime);
+  expect(await share.boundingBox()).toEqual(initialShare);
 });
 
 for (const [reading, phrase] of [

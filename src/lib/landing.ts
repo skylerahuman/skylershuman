@@ -63,7 +63,11 @@ function reveal(result: Comparison, client: Client, benchmark: Benchmark): void 
   if (!(comparison && source && pace)) {
     return;
   }
-  pace.textContent = result.multiplier >= 2 ? `${result.multiplier}× ` : "";
+  const mark = pace.firstElementChild;
+  if (mark && result.multiplier >= 2) {
+    mark.textContent = `${result.multiplier}×`;
+    pace.hidden = false;
+  }
   source.textContent = `${result.percentage}%`;
   source.href = benchmark.url;
   source.title = `${benchmark.label} · ${client}`;
@@ -88,7 +92,9 @@ function roll(digits: HTMLElement, value: number): void {
 function count(digits: HTMLElement, from: number, to: number): void {
   const start = performance.now();
   let frame = 0;
-  digits.textContent = String(from);
+  const initial = String(from);
+  digits.parentElement?.setAttribute("data-reserve", initial);
+  digits.textContent = initial;
 
   function tick(now: number): void {
     const progress = Math.max(0, (now - start) / duration);

@@ -28,13 +28,35 @@ a {
   color: inherit;
   font-weight: 700;
   font-variant-numeric: tabular-nums;
-  text-decoration: underline;
-  text-underline-offset: 0.2em;
+  text-decoration: none;
 }
 
+.lined {
+  position: relative;
+}
+
+.lined::after {
+  position: absolute;
+  inset-inline: 0;
+  inset-block-end: -0.12em;
+  border-bottom: 1px solid currentColor;
+  content: "";
+}
+
+.number-slot {
+  display: inline-grid;
+  text-align: end;
+  vertical-align: bottom;
+}
+
+.number-slot::before,
 #digits {
-  display: inline-block;
-  white-space: nowrap;
+  grid-area: 1 / 1;
+}
+
+.number-slot::before {
+  content: attr(data-reserve);
+  visibility: hidden;
 }
 
 #digits span {
