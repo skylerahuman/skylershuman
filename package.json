@@ -5,16 +5,23 @@
   "version": "0.1.0",
   "packageManager": "pnpm@12.9.0",
   "engines": {
-    "node": ">=22"
+    "node": ">=22.23.4"
   },
   "scripts": {
     "quality": "biome ci . && node scripts/comments.mjs && node scripts/budget.mjs",
     "quality:selftest": "node scripts/selftest.mjs && node --experimental-strip-types --test .pi/extensions/review/review-diff.test.ts",
     "format": "biome format --write .",
-    "lint": "biome lint ."
+    "lint": "biome lint .",
+    "dev": "astro dev",
+    "build": "astro build",
+    "test": "playwright test"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.6.9",
+    "@playwright/test": "1.65.1",
     "typescript": "^5.9.3"
+  },
+  "dependencies": {
+    "astro": "7.4.13"
   }
 }

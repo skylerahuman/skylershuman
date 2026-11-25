@@ -1,6 +1,17 @@
 # skylershuman.com
 
-Source for the consulting site at skylershuman.com. Static output, zero client-side JavaScript, served from Cloudflare's edge. Content lives in `src/content/` and `src/data/`; the engine is small on purpose (see `quality/budget.json`).
+Source for the consulting site at skylershuman.com. Astro builds a static landing page with one small browser script for Navigation Timing. No client-side framework, analytics, or benchmark requests.
+
+## Landing page
+
+```sh
+pnpm dev             # http://localhost:4321
+pnpm build           # static output in dist/
+pnpm exec playwright install chromium
+pnpm test            # Chromium acceptance tests
+```
+
+The page measures from navigation start through `loadEventEnd`. The comparison and countdown stay off while `src/data/benchmark.json` is `null`. [HTTP Archive's public onLoad histogram](https://httparchive.org/reports/loading-speed?start=2026_10_01#ol) uses WebPageTest's `docTime`, which [tracks `loadEventStart`](https://github.com/HTTPArchive/wptagent/blob/master/internal/support/devtools_parser.py), so it is not used as a substitute. To enable the comparison, supply a dated source (`label`, `url`) and `milliseconds` observations of the matching end-of-load metric.
 
 ## Quality gate
 

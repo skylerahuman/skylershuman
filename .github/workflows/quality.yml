@@ -23,6 +23,9 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm quality
       - run: pnpm quality:selftest
+      - run: pnpm build
+      - run: pnpm exec playwright install --with-deps chromium
+      - run: pnpm test
       - name: Budget changes need a decision record
         run: |
           base="${{ github.event.pull_request.base.sha || github.event.before }}"

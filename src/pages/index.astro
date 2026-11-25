@@ -1,0 +1,45 @@
+---
+import benchmark from "../data/benchmark.json";
+import "../styles/landing.css";
+
+const unavailable = "Load time is unavailable.";
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Skyler Human · Load time</title>
+  </head>
+  <body>
+    <main>
+      <noscript><p>{unavailable}</p></noscript>
+      <p id="unavailable" hidden>{unavailable}</p>
+      <p id="measurement" hidden>
+        This site loaded in{" "}<strong
+          ><span id="digits" data-testid="milliseconds"></span> ms</strong
+        >.
+      </p>
+      <p id="comparison" hidden>That’s faster than <strong id="percentile"></strong> of the web.</p>
+    </main>
+    <script
+      id="benchmark-data"
+      type="application/json"
+      set:html={JSON.stringify(benchmark).replaceAll("<", "\\u003c")}
+    />
+    <script>
+    import { present } from "../lib/landing";
+
+    function schedule(): void {
+      window.setTimeout(present, 0);
+    }
+
+    if (document.readyState === "complete") {
+      schedule();
+    } else {
+      window.addEventListener("load", schedule, { once: true });
+    }
+    </script>
+  </body>
+</html>
