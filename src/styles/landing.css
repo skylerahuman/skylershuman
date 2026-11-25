@@ -23,6 +23,17 @@ p {
   padding: 0.5rem 1rem;
 }
 
+#measurement[data-client="mobile"] {
+  padding-inline: 0.25rem;
+  text-align: center;
+  letter-spacing: -0.015em;
+}
+
+[data-client="mobile"] #comparison:not([hidden]) {
+  display: block;
+  margin-block-start: 0.35em;
+}
+
 strong,
 a {
   color: inherit;
@@ -38,8 +49,8 @@ a {
 .lined::after {
   position: absolute;
   inset-inline: 0;
-  inset-block-end: -0.12em;
-  border-bottom: 1px solid currentColor;
+  inset-block-end: 0;
+  border-bottom: 2px solid currentColor;
   content: "";
 }
 
@@ -55,6 +66,10 @@ a {
 
 .number-slot > span {
   justify-self: end;
+}
+
+.multiplier-slot > span {
+  justify-self: center;
 }
 
 .number-slot::before {

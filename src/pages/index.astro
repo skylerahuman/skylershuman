@@ -23,11 +23,14 @@ const unavailable = "Load time is unavailable.";
           >{" "}ms</strong
         >.<span id="comparison" hidden
           >{" "}That’s{" "}<span id="pace" hidden
-            ><strong class="number-slot" data-reserve="00×"
-              ><span id="factor" class="lined"></span></strong
+            ><strong class="lined"
+              ><span class="number-slot multiplier-slot" data-reserve="00×"
+                ><span id="factor"></span></span
+              ></strong
             >{" "}</span
-          >faster than at least{" "}<a id="percentile" href={benchmark.url}>Benchmark</a>{" "}of
-          sites.</span
+          >faster than at least{" "}<a id="percentile" href={benchmark.url}
+            >Benchmark</a
+          >{" "}of{" "}<span id="audience">sites.</span></span
         >
       </p>
     </main>

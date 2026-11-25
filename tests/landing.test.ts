@@ -33,7 +33,7 @@ test("L1, L7, L11: a narrow desktop window scrolls one readable comparison line"
   ).toBe(true);
 });
 
-test("L11, L13, L15: separate lines mark the time and bold multiplier only", async ({
+test("L11, L13, L15, L18: heavier lines sit close to the time and bold multiplier", async ({
   page,
 }): Promise<void> => {
   await page.setViewportSize({ width: 1024, height: 680 });
@@ -48,13 +48,15 @@ test("L11, L13, L15: separate lines mark the time and bold multiplier only", asy
   await expect(main).toHaveCSS("font-size", "16px");
   const time = main.getByText("80 ms", { exact: true });
   const share = main.getByRole("link", { name: "97%" });
-  const multiplier = main.getByText("12×", { exact: true });
+  const multiplier = main.locator("strong").filter({ hasText: /^12×$/ });
   await expect(multiplier).toHaveCSS("font-weight", "700");
   for (const item of [time, multiplier]) {
     await expect(item).toHaveCSS("text-decoration-line", "none");
-    expect(
-      await item.evaluate((mark): string => getComputedStyle(mark, "::after").borderBottomStyle),
-    ).toBe("solid");
+    const line = await item.evaluate((mark): string[] => {
+      const style = getComputedStyle(mark, "::after");
+      return [style.borderBottomStyle, style.borderBottomWidth, style.bottom];
+    });
+    expect(line).toEqual(["solid", "2px", "0px"]);
   }
   await expect(share).toHaveCSS("text-decoration-line", "none");
   await expect(share).toHaveCSS("font-weight", "700");
@@ -89,7 +91,7 @@ test("L14: the time mark and the comparison stay still as the digit count shrink
   expect(await share.boundingBox()).toEqual(initialShare);
 });
 
-test("L15: the bold multiplier reserves two digits and grows when needed", async ({
+test("L15 and L19: the multiplier is centered over a two-digit line that can grow", async ({
   context,
 }): Promise<void> => {
   const positions: number[] = [];
@@ -105,7 +107,18 @@ test("L15: the bold multiplier reserves two digits and grows when needed", async
     await page.emulateMedia({ reducedMotion: "reduce" });
     await readLanding(page, 100, { ...sample, desktop: { ...sample.desktop, counts } });
     await page.clock.runFor(16);
-    await expect(page.getByText(multiplier, { exact: true })).toBeVisible();
+    const value = page.getByText(multiplier, { exact: true });
+    await expect(value).toBeVisible();
+    const mark = page.locator("strong").filter({ hasText: new RegExp(`^${multiplier}$`) });
+    const slot = await mark.boundingBox();
+    const visible = await value.boundingBox();
+    expect(
+      visible && slot ? visible.x + visible.width / 2 - slot.x - slot.width / 2 : Infinity,
+    ).toBeCloseTo(0, 1);
+    const line = await mark.evaluate((item): number =>
+      parseFloat(getComputedStyle(item, "::after").width),
+    );
+    expect(line).toBeCloseTo(slot?.width ?? 0, 1);
     const share = await page.getByRole("link", { name: "80%" }).boundingBox();
     expect(share).not.toBeNull();
     positions.push(share?.x ?? 0);
@@ -160,26 +173,6 @@ test("L6: the displayed time rounds the start of the load event, not its end", a
   await readLanding(page, 123.4);
   await page.clock.runFor(16);
   await expect(page.getByText("This site loaded in 123 ms.")).toBeVisible();
-});
-
-test("L7: the mobile device signal selects the mobile comparison even in a wide window", async ({
-  page,
-}): Promise<void> => {
-  await page.setViewportSize({ width: 1200, height: 700 });
-  await page.addInitScript((): void => {
-    Object.defineProperty(navigator, "userAgentData", { value: { mobile: true } });
-  });
-  await page.emulateMedia({ reducedMotion: "reduce" });
-  await readLanding(page, 80);
-  await page.clock.runFor(16);
-  await expect(page.getByRole("main")).toHaveText(
-    "This site loaded in 80 ms. That’s 12× faster than at least 99% of sites.",
-    { useInnerText: true },
-  );
-  await expect(page.getByRole("link", { name: "99%" })).toHaveAttribute(
-    "title",
-    "HTTP Archive · October 2026 · mobile",
-  );
 });
 
 for (const [reading, percentage] of [

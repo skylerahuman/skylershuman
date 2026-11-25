@@ -68,6 +68,10 @@ function reveal(result: Comparison, client: Client, benchmark: Benchmark): void 
     mark.textContent = `${result.multiplier}×`;
     pace.hidden = false;
   }
+  const audience = document.getElementById("audience");
+  if (audience && client === "mobile") {
+    audience.textContent = "mobile sites.";
+  }
   source.textContent = `${result.percentage}%`;
   source.href = benchmark.url;
   source.title = `${benchmark.label} · ${client}`;
@@ -128,6 +132,7 @@ export function present(): void {
   measurement.hidden = false;
 
   const client = identifyClient();
+  measurement.dataset.client = client;
   const benchmark = parseBenchmark();
   const histogram = benchmark?.[client];
   if (!(benchmark && histogram)) {
