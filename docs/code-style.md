@@ -17,18 +17,20 @@ Two sections. **Enforced** rules are machine-checked by `pnpm quality` (Biome + 
 | Components are pure: `src/components/**` and `src/layouts/**` cannot import `astro:content` or `node:*`                                  | `overrides` in `biome.json`                                                                                       |
 | Templates: no inline `style`, no `!important`, selector complexity capped, a11y rules on markup, no runtime default exports in `.astro`  | `noInlineStyles`, `noImportantStyles`, `noExcessiveSelectorComplexity`, `a11y/*`, `noAstroComponentDefaultExport` |
 | No prose comments. Allowed: `@ts-expect-error <reason>`, `biome-ignore lint/<group>/<rule>: <reason>`, `ADR-N`; each count budgeted at 0 | `scripts/comments.mjs`, `quality/budget.json`                                                                     |
-| Size budget: engine ≤ 800, css ≤ 300, worker ≤ 200, tooling ≤ 480 source lines (non-blank, non-comment)                                  | `scripts/budget.mjs`, `quality/budget.json`                                                                       |
+| Size budget: engine ≤ 800, css ≤ 300, worker ≤ 200, tooling ≤ 480, Pi extensions ≤ 230 source lines (non-blank, non-comment)             | `scripts/budget.mjs`, `quality/budget.json`                                                                       |
 | Budgets move down freely; up only with a new record in `docs/decisions/`                                                                 | `.github/workflows/quality.yml`                                                                                   |
 
 The gate proves itself: `pnpm quality:selftest` lints `quality/fixtures/` with the real config and asserts every rule fires and the clean fixture passes.
 
 ## Judgment
 
-Review asks three questions and nothing else:
+For naming and design, review asks three questions:
 
 1. **Is the noun right?** Does the name say what the function operates on when the parameters cannot?
 2. **Is the verb the right verb?** `get` is O(1) and synchronous; `find` is O(n); `fetch` is async; `parse` throws at build time, `tryParse` does not. A verb has a cost and an I/O contract.
 3. **Is this one idea?** General over everything that exists today, nothing for what does not exist yet. Two similar components are one idea waiting to be noticed; an option nobody passes is complexity, not flexibility.
+
+Name files so a reviewer can tell what they cover and when to open them without reading the contents. In `AGENTS/`, use action-and-subject names rather than numbers or catch-alls like `workflow.md`. Where a tool owns the filename, make the parent directory carry that meaning.
 
 For components: a component is a noun; props are its adjectives; a page is the sentence built from them. You should be able to guess where a component goes and what it renders before reading its style.
 

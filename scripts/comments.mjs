@@ -1,6 +1,6 @@
 import { classify, DIRECTIVES, readPaths, readText, scanText } from "./scan.mjs";
 
-const ROOTS = ["src", "worker", "scripts", "quality"];
+const ROOTS = ["src", "worker", "scripts", "quality", ".pi/extensions"];
 const CODE = /\.(?:[cm]?[jt]s|astro|svelte|css|grit)$/;
 
 async function readComments(paths) {

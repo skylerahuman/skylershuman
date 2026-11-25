@@ -7,7 +7,7 @@ Source for the consulting site at skylershuman.com. Static output, zero client-s
 ```sh
 pnpm install
 pnpm quality          # biome ci + comment gate + size budget (what CI runs)
-pnpm quality:selftest # proves every rule fires and the clean fixture passes
+pnpm quality:selftest # checks gate fixtures and Pi review behavior
 lefthook install      # fast checks on commit, full gate on push
 ```
 
@@ -30,4 +30,4 @@ docs/             code style, decisions
 
 ## Workflow
 
-Branch → PR → `pnpm quality` green → human review → squash merge. AI-assisted commits carry `Assisted-by: <model>`.
+Start feature work with `/skill:feature` in Pi. Stage-specific instructions live in `AGENTS/` and are read on demand. In a trusted Pi session, run `/review` to walk the committed PR diff before you squash-merge it. The review stays in Pi; GitHub does not enforce it. AI-assisted commits carry `Assisted-by: <model>`.
