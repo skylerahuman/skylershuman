@@ -1,0 +1,14 @@
+pre-commit:
+  parallel: true
+  commands:
+    biome:
+      glob: "*.{js,mjs,ts,mts,json,jsonc,css,astro,svelte,html,grit}"
+      run: pnpm exec biome check --write --no-errors-on-unmatched {staged_files}
+    comments:
+      glob: "*.{js,mjs,ts,mts,astro,svelte,css,grit}"
+      exclude: "quality/fixtures/**"
+      run: node scripts/comments.mjs {staged_files}
+pre-push:
+  commands:
+    quality:
+      run: pnpm quality

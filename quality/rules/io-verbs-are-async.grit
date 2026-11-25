@@ -1,0 +1,14 @@
+engine biome(1.0)
+language js(typescript, jsx)
+
+or {
+	JsFunctionDeclaration(id=$name) as $fn where { $fn <: not r"async[\s\S]*" },
+	JsMethodClassMember(name=$name) as $fn where { $fn <: not r"async[\s\S]*" },
+	JsVariableDeclarator(id=$name) as $fn where {
+		$fn <: r"\w+\s*=\s*(?:function\b[\s\S]*|\([^()]*\)\s*=>[\s\S]*)",
+		$fn <: not r"\w+\s*=\s*async[\s\S]*"
+	}
+} where {
+	$name <: r"(?:fetch|read|save)(?:[A-Z].*)?",
+	register_diagnostic(span=$name, message="fetch*, read*, and save* are I/O verbs and must be async. If this does no I/O, rename it (get/find/filter/parse...).", severity="error")
+}

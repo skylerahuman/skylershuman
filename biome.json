@@ -1,0 +1,231 @@
+{
+  "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
+  "vcs": {
+    "enabled": true,
+    "clientKind": "git",
+    "useIgnoreFile": true
+  },
+  "files": {
+    "ignoreUnknown": true,
+    "includes": ["**", "!quality/fixtures", "!pnpm-lock.yaml"]
+  },
+  "html": {
+    "experimentalFullSupportEnabled": true,
+    "formatter": {
+      "enabled": true,
+      "indentWidth": 2,
+      "lineWidth": 100,
+      "selfCloseVoidElements": "always",
+      "indentStyle": "space"
+    }
+  },
+  "javascript": {
+    "formatter": {
+      "indentWidth": 2,
+      "lineWidth": 100,
+      "semicolons": "always",
+      "quoteStyle": "double",
+      "trailingCommas": "all",
+      "arrowParentheses": "always",
+      "quoteProperties": "asNeeded",
+      "indentStyle": "space"
+    }
+  },
+  "json": {
+    "formatter": {
+      "indentWidth": 2,
+      "lineWidth": 100,
+      "indentStyle": "space"
+    }
+  },
+  "css": {
+    "formatter": {
+      "indentWidth": 2,
+      "lineWidth": 100,
+      "quoteStyle": "double",
+      "indentStyle": "space"
+    }
+  },
+  "assist": {
+    "actions": {
+      "source": {
+        "organizeImports": "on"
+      }
+    }
+  },
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "correctness": {
+        "recommended": true,
+        "noUnusedVariables": "error",
+        "noUnusedImports": "error",
+        "noUnusedFunctionParameters": "error"
+      },
+      "suspicious": {
+        "recommended": true,
+        "noExplicitAny": "error",
+        "noConsole": "error",
+        "noEmptyBlockStatements": "error",
+        "useAwait": "error"
+      },
+      "complexity": {
+        "recommended": false,
+        "noExcessiveCognitiveComplexity": {
+          "level": "error",
+          "options": {
+            "maxAllowedComplexity": 8
+          }
+        },
+        "useMaxParams": {
+          "level": "error",
+          "options": {
+            "max": 3
+          }
+        },
+        "noExcessiveLinesPerFunction": {
+          "level": "error",
+          "options": {
+            "maxLines": 40
+          }
+        },
+        "useLiteralKeys": "error",
+        "noExtraBooleanCast": "error",
+        "useSimplifiedLogicExpression": "error",
+        "useFlatMap": "error",
+        "noForEach": "error",
+        "useArrowFunction": "error",
+        "noImportantStyles": "error"
+      },
+      "style": {
+        "recommended": false,
+        "noNonNullAssertion": "error",
+        "useConst": "error",
+        "useTemplate": "error",
+        "useImportType": "error",
+        "useExportType": "error",
+        "useNodejsImportProtocol": "error",
+        "useConsistentArrayType": {
+          "level": "error",
+          "options": {
+            "syntax": "shorthand"
+          }
+        },
+        "noCommonJs": "error",
+        "noParameterProperties": "error",
+        "useSingleVarDeclarator": "error",
+        "useBlockStatements": "error",
+        "noUselessElse": "error",
+        "useCollapsedElseIf": "error",
+        "useShorthandFunctionType": "error",
+        "useForOf": "error",
+        "useDefaultSwitchClause": "error",
+        "noExcessiveLinesPerFile": {
+          "level": "error",
+          "options": {
+            "maxLines": 300
+          }
+        },
+        "useNamingConvention": {
+          "level": "error",
+          "options": {
+            "strictCase": true,
+            "requireAscii": true
+          }
+        },
+        "useFilenamingConvention": {
+          "level": "error",
+          "options": {
+            "filenameCases": ["camelCase", "PascalCase", "kebab-case"],
+            "requireAscii": true
+          }
+        },
+        "noInlineStyles": "error"
+      },
+      "nursery": {
+        "recommended": false,
+        "useExplicitType": "error",
+        "useConsistentFunctionStyle": {
+          "level": "error",
+          "options": {
+            "style": "declaration"
+          }
+        },
+        "noExcessiveSelectorComplexity": "error",
+        "noAstroComponentDefaultExport": "error"
+      },
+      "performance": {
+        "recommended": true
+      },
+      "a11y": {
+        "recommended": true
+      },
+      "security": {
+        "recommended": true
+      }
+    }
+  },
+  "overrides": [
+    {
+      "includes": ["src/components/**", "src/layouts/**"],
+      "linter": {
+        "rules": {
+          "style": {
+            "noRestrictedImports": {
+              "level": "error",
+              "options": {
+                "paths": {
+                  "astro:content": "Components are pure (props in, HTML out). Fetch data in page frontmatter or src/lib/content.ts and pass it down.",
+                  "node:fs": "Components are pure (props in, HTML out). File I/O belongs in page frontmatter or src/lib/content.ts.",
+                  "node:path": "Components are pure (props in, HTML out). Path handling belongs in src/lib/."
+                },
+                "patterns": [
+                  {
+                    "group": ["node:*"],
+                    "message": "Components are pure (props in, HTML out). Node built-ins belong in src/lib/ or page frontmatter."
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "includes": ["scripts/**", "quality/**"],
+      "linter": {
+        "rules": {
+          "suspicious": {
+            "noConsole": "off"
+          }
+        }
+      }
+    }
+  ],
+  "plugins": [
+    {
+      "path": "./quality/rules/async-requires-io-verb.grit",
+      "resolutionKind": "config"
+    },
+    {
+      "path": "./quality/rules/io-verbs-are-async.grit",
+      "resolutionKind": "config"
+    },
+    {
+      "path": "./quality/rules/no-vague-verbs.grit",
+      "resolutionKind": "config"
+    },
+    {
+      "path": "./quality/rules/no-compound-verbs.grit",
+      "resolutionKind": "config"
+    },
+    {
+      "path": "./quality/rules/no-field-getters.grit",
+      "resolutionKind": "config"
+    },
+    {
+      "path": "./quality/rules/no-options-parameter.grit",
+      "resolutionKind": "config"
+    }
+  ]
+}

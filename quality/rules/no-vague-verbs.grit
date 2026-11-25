@@ -1,0 +1,13 @@
+engine biome(1.0)
+language js(typescript, jsx)
+
+or {
+	JsFunctionDeclaration(id=$name) as $fn,
+	JsMethodClassMember(name=$name) as $fn,
+	JsVariableDeclarator(id=$name) as $fn where {
+		$fn <: r"\w+\s*=\s*(?:async\s*)?(?:function\b[\s\S]*|\([^()]*\)\s*=>[\s\S]*)"
+	}
+} where {
+	$name <: r"(?:process|handle|manage|compute|run|execute|do|load|util|helper|misc|generic|common|perform|apply)(?:[A-Z].*|)",
+	register_diagnostic(span=$name, message="Vague verb. Name the one operation this performs on its parameters, or delete it.", severity="error")
+}

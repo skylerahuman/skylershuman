@@ -1,0 +1,7 @@
+engine biome(1.0)
+language js(typescript, jsx)
+
+JsParameters() as $params where {
+	$params <: r"\(\s*(?:options|opts|config)\b[\s\S]*",
+	register_diagnostic(span=$params, message="No options bag. Pass the nouns explicitly; a parameter nobody passes is complexity, not flexibility.", severity="error")
+}

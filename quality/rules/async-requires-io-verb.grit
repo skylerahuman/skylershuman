@@ -1,0 +1,13 @@
+engine biome(1.0)
+language js(typescript, jsx)
+
+or {
+	JsFunctionDeclaration(id=$name) as $fn where { $fn <: r"async[\s\S]*" },
+	JsMethodClassMember(name=$name) as $fn where { $fn <: r"async[\s\S]*" },
+	JsVariableDeclarator(id=$name) as $fn where {
+		$fn <: r"\w+\s*=\s*async[\s\S]*"
+	}
+} where {
+	$name <: not r"(?:fetch|read|save)(?:[A-Z].*)?",
+	register_diagnostic(span=$name, message="Async means I/O. Only fetch*, read*, and save* are async verbs; a `get` that awaits is a `find` or a fetch, and anything else should be synchronous.", severity="error")
+}

@@ -1,0 +1,20 @@
+{
+  "name": "skylershuman-com",
+  "private": true,
+  "type": "module",
+  "version": "0.1.0",
+  "packageManager": "pnpm@12.9.0",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "quality": "biome ci . && node scripts/comments.mjs && node scripts/budget.mjs",
+    "quality:selftest": "node scripts/selftest.mjs",
+    "format": "biome format --write .",
+    "lint": "biome lint ."
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.6.9",
+    "typescript": "^5.9.3"
+  }
+}

@@ -1,0 +1,15 @@
+engine biome(1.0)
+language js(typescript, jsx)
+
+or {
+	JsFunctionDeclaration(id=$name) as $fn where {
+		$name <: r"(?:get|is|has)(?:[A-Z].*|)",
+		$fn <: r"(?:async\s+)?function\s+\w+\s*\(\s*[^,()]+\s*\)[^{]*\{[^{}]*return\s+\w+\.\w+\s*;?\s*\}"
+	},
+	JsVariableDeclarator(id=$name) as $fn where {
+		$name <: r"(?:get|is|has)(?:[A-Z].*|)",
+		$fn <: r"\w+\s*=\s*\(\s*\w+\s*\)\s*=>\s*\w+\.\w+\s*;?"
+	}
+} where {
+	register_diagnostic(span=$name, message="This function only reads a property. Properties are nouns, not functions: use the property at the call site.", severity="error")
+}
