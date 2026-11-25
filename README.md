@@ -11,7 +11,9 @@ pnpm exec playwright install chromium
 pnpm test            # Chromium acceptance tests
 ```
 
-The page measures from navigation start through `loadEventEnd`. The comparison and countdown stay off while `src/data/benchmark.json` is `null`. [HTTP Archive's public onLoad histogram](https://httparchive.org/reports/loading-speed?start=2026_10_01#ol) uses WebPageTest's `docTime`, which [tracks `loadEventStart`](https://github.com/HTTPArchive/wptagent/blob/master/internal/support/devtools_parser.py), so it is not used as a substitute. To enable the comparison, supply a dated source (`label`, `url`) and `milliseconds` observations of the matching end-of-load metric.
+The page measures from navigation start to `loadEventStart`, matching [HTTP Archive's onLoad benchmark](https://httparchive.org/reports/loading-speed?start=2026_10_01#ol). The benchmark is a synthetic crawl, not a real-user distribution. A browser device signal selects the desktop or mobile sample without using viewport width.
+
+`src/data/benchmark.json` pins October 2026. Each `counts` index is the lower bound in seconds of a one-second bucket; the values are the published [histogram volumes](https://cdn.httparchive.org/v1/static/reports/2026_10_01/ol.json), with missing buckets stored as zero. Only buckets whose lower bound exceeds the unrounded timing count as slower, so the displayed whole percent is a conservative lower bound. Countdown starting values come from the corresponding published [p50 values](https://cdn.httparchive.org/v1/static/reports/ol.json), converted to milliseconds.
 
 ## Quality gate
 

@@ -1,7 +1,13 @@
-type Benchmark = {
+type Client = "desktop" | "mobile";
+
+type Histogram = {
+  median: number;
+  counts: number[];
+};
+
+type Benchmark = Partial<Record<Client, Histogram>> & {
   label: string;
   url: string;
-  milliseconds: number[];
 };
 
 const duration = 120;
@@ -10,28 +16,43 @@ function measure(): number | undefined {
   const entry = performance.getEntriesByType?.("navigation")[0] as
     | PerformanceNavigationTiming
     | undefined;
-  const milliseconds = entry ? entry.loadEventEnd - entry.startTime : 0;
+  const milliseconds = entry ? entry.loadEventStart - entry.startTime : 0;
   return Number.isFinite(milliseconds) && milliseconds > 0 ? milliseconds : undefined;
+}
+
+function identifyClient(): Client {
+  const browser = navigator as Navigator & { userAgentData?: { mobile: boolean } };
+  const mobile =
+    browser.userAgentData?.mobile ?? /Android|iPhone|iPad|iPod|Mobile/i.test(browser.userAgent);
+  return mobile ? "mobile" : "desktop";
 }
 
 function parseBenchmark(): Benchmark | null {
   const data = document.getElementById("benchmark-data")?.textContent;
-  const benchmark = JSON.parse(data || "null") as Benchmark | null;
-  return Array.isArray(benchmark?.milliseconds) && benchmark.milliseconds.length ? benchmark : null;
+  return JSON.parse(data || "null") as Benchmark | null;
 }
 
-function compare(milliseconds: number, benchmark: Benchmark): number {
-  const slower = benchmark.milliseconds.filter((sample): boolean => sample > milliseconds).length;
-  return (100 * slower) / benchmark.milliseconds.length;
+function compare(milliseconds: number, histogram: Histogram): number | undefined {
+  let total = 0;
+  let slower = 0;
+  for (const [second, count] of histogram.counts.entries()) {
+    total += count;
+    if (second * 1000 > milliseconds) {
+      slower += count;
+    }
+  }
+  return total > 0 ? Math.floor((100 * slower) / total) : undefined;
 }
 
-function reveal(milliseconds: number, benchmark: Benchmark): void {
+function reveal(percentage: number, client: Client, benchmark: Benchmark): void {
   const comparison = document.getElementById("comparison");
   const percentile = document.getElementById("percentile");
-  if (!(comparison && percentile)) {
+  const audience = document.getElementById("audience");
+  if (!(comparison && percentile && audience)) {
     return;
   }
-  percentile.textContent = `${Math.floor(compare(milliseconds, benchmark))}%`;
+  percentile.textContent = `${percentage}%`;
+  audience.textContent = ` of ${client} pages.`;
   const source = document.createElement("a");
   source.textContent = benchmark.label;
   source.href = benchmark.url;
@@ -89,14 +110,18 @@ export function present(): void {
   digits.textContent = String(rounded);
   measurement.hidden = false;
 
+  const client = identifyClient();
   const benchmark = parseBenchmark();
-  if (!benchmark) {
+  const histogram = benchmark?.[client];
+  if (!(benchmark && histogram)) {
     return;
   }
-  reveal(milliseconds, benchmark);
-  const total = benchmark.milliseconds.reduce((sum, sample): number => sum + sample, 0);
-  const mean = Math.round(total / benchmark.milliseconds.length);
-  if (mean > rounded && !matchMedia("(prefers-reduced-motion: reduce)").matches) {
-    count(digits, mean, rounded);
+  const percentage = compare(milliseconds, histogram);
+  if (percentage === undefined) {
+    return;
+  }
+  reveal(percentage, client, benchmark);
+  if (histogram.median > rounded && !matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    count(digits, histogram.median, rounded);
   }
 }
