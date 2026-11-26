@@ -10,28 +10,39 @@ const unavailable = "Load time is unavailable.";
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Skyler Human · Load time</title>
+    <title>Skyler Shuman</title>
   </head>
   <body>
     <main>
-      <noscript><p>{unavailable}</p></noscript>
-      <p id="unavailable" hidden>{unavailable}</p>
+      <noscript>
+        <p>{unavailable}</p>
+      </noscript>
+      <p id="unavailable" hidden>
+        {unavailable}
+      </p>
       <p id="measurement" hidden>
-        This site loaded in{" "}<strong class="lined"
-          ><span class="number-slot"
-            ><span id="digits" data-testid="milliseconds"></span></span
-          >{" "}ms</strong
-        >.<span id="comparison" hidden
-          >{" "}That’s{" "}<span id="pace" hidden
-            ><strong class="lined"
-              ><span class="number-slot multiplier-slot" data-reserve="00×"
-                ><span id="factor"></span></span
-              ></strong
-            >{" "}</span
-          >faster than at least{" "}<a id="percentile" href={benchmark.url}
-            >Benchmark</a
-          >{" "}of{" "}<span id="audience">sites.</span></span
-        >
+        This site loaded in{" "}
+        <strong class="lined">
+          <span class="number-slot">
+            <span id="digits" data-testid="milliseconds"></span>
+          </span>{" "}
+          ms
+        </strong>
+        .
+        <span id="comparison" hidden>
+          {" "}
+          That’s{" "}
+          <span id="pace" hidden>
+            <strong class="lined">
+              <span class="number-slot multiplier-slot" data-reserve="00×">
+                <span id="factor"></span>
+              </span>
+            </strong>{" "}
+          </span>
+          faster than at least{" "}
+          <a id="percentile" href={benchmark.url}> Benchmark </a>{" "}
+          of <span id="audience">sites.</span>
+        </span>
       </p>
     </main>
     <script

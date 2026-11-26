@@ -6,3 +6,9 @@ routes = [{ pattern = "skylershuman.com", custom_domain = true }]
 
 [assets]
 directory = "./dist"
+
+[env.preview]
+name = "skylershuman-preview"
+workers_dev = true
+preview_urls = false
+routes = []

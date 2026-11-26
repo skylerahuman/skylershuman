@@ -24,10 +24,7 @@ function measure(): number | undefined {
 }
 
 function identifyClient(): Client {
-  const browser = navigator as Navigator & { userAgentData?: { mobile: boolean } };
-  const mobile =
-    browser.userAgentData?.mobile ?? /Android|iPhone|iPad|iPod|Mobile/i.test(browser.userAgent);
-  return mobile ? "mobile" : "desktop";
+  return matchMedia("(max-width: 600px)").matches ? "mobile" : "desktop";
 }
 
 function parseBenchmark(): Benchmark | null {
@@ -132,7 +129,6 @@ export function present(): void {
   measurement.hidden = false;
 
   const client = identifyClient();
-  measurement.dataset.client = client;
   const benchmark = parseBenchmark();
   const histogram = benchmark?.[client];
   if (!(benchmark && histogram)) {

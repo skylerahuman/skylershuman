@@ -11,13 +11,13 @@ pnpm exec playwright install chromium
 pnpm test            # Chromium acceptance tests
 ```
 
-The page measures from navigation start to `loadEventStart`, matching [HTTP Archive's onLoad benchmark](https://httparchive.org/reports/loading-speed?start=2026_10_01#ol). The benchmark is a synthetic crawl, not a real-user distribution. A browser device signal selects the desktop or mobile sample without using viewport width.
+The page measures from navigation start to `loadEventStart`, matching [HTTP Archive's onLoad benchmark](https://httparchive.org/reports/loading-speed?start=2026_10_01#ol). The benchmark is a synthetic crawl, not a real-user distribution. The viewport width at load selects the mobile sample at 600 CSS pixels or less and the desktop sample above that. The layout responds to resizing and lets the comparison wrap instead of scrolling sideways.
 
 `src/data/benchmark.json` pins October 2026. Each `counts` index is the lower bound in seconds of a one-second bucket; the values are the published [histogram volumes](https://cdn.httparchive.org/v1/static/reports/2026_10_01/ol.json), with missing buckets stored as zero. Only buckets whose lower bound exceeds the unrounded timing count as slower, so the displayed whole percent is a conservative lower bound. The multiplier is the largest whole factor for which the same buckets are still strictly slower; factors below 2× are omitted. Countdown starting values come from the corresponding published [p50 values](https://cdn.httparchive.org/v1/static/reports/ol.json), converted to milliseconds.
 
 ## Deploy
 
-On pushes to `main`, GitHub Actions deploys Astro’s `dist/` to a Cloudflare Workers Static Assets site after the quality checks and tests pass. Pull requests run checks without deploying. `wrangler.toml` serves `skylershuman.com` directly from static files, with no Worker script.
+On pushes to `main`, GitHub Actions deploys Astro’s `dist/` to a Cloudflare Workers Static Assets site after the quality checks and tests pass. Pushes to `feature/load-time-landing` deploy the same build to a separate `skylershuman-preview` Worker on `workers.dev` for speed testing. Pull request events run checks without deploying. `wrangler.toml` serves both deployments directly from static files, with no Worker script.
 
 Before the first deploy:
 

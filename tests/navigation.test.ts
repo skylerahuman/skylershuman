@@ -10,9 +10,11 @@ test("L6 and L8: a real visit reports its load-event start and a sourced compari
   });
   expect(milliseconds).toBeGreaterThan(0);
   await expect(page.getByText(`This site loaded in ${milliseconds} ms.`)).toBeVisible();
-  await expect(
-    page.getByText(/That’s (?:\d+× )?faster than at least \d+% of sites\./),
-  ).toBeVisible();
+  const comparison = page.locator("#comparison");
+  await expect(comparison).toBeVisible();
+  await expect(comparison).toHaveText(/That’s\s+(?:\d+×\s+)?faster than at least \d+% of sites\./, {
+    useInnerText: true,
+  });
   await expect(page.getByRole("link", { name: /\d+%/ })).toHaveAttribute(
     "title",
     "HTTP Archive · October 2026 · desktop",

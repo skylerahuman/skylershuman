@@ -3,10 +3,10 @@ import { readLanding, sample } from "./landing-fixture";
 
 const archive = "https://httparchive.org/reports/loading-speed?start=2026_10_01#ol";
 
-test("L1, L7, L11: a narrow desktop window scrolls one readable comparison line", async ({
+test("L1, L7, L11: a wide viewport shows one readable desktop comparison line", async ({
   page,
 }): Promise<void> => {
-  await page.setViewportSize({ width: 320, height: 620 });
+  await page.setViewportSize({ width: 601, height: 620 });
   await page.emulateMedia({ reducedMotion: "reduce" });
   await readLanding(page, 500);
   await page.clock.runFor(16);
@@ -18,14 +18,11 @@ test("L1, L7, L11: a narrow desktop window scrolls one readable comparison line"
   const source = main.getByRole("link", { name: "97%" });
   await expect(source).toHaveAttribute("href", archive);
   await expect(source).toHaveAttribute("title", "HTTP Archive · October 2026 · desktop");
-  await expect(main).toHaveCSS("font-size", "12px");
-  await expect(main).toHaveCSS("white-space", "nowrap");
-  expect(
-    await main.evaluate((line): number => {
-      line.scrollLeft = line.scrollWidth;
-      return line.scrollLeft;
-    }),
-  ).toBeGreaterThan(0);
+  await expect(main).toHaveCSS("font-size", "12.02px");
+  expect((await main.getByText("500 ms", { exact: true }).boundingBox())?.y).toBe(
+    (await source.boundingBox())?.y,
+  );
+  expect(await main.evaluate((line): boolean => line.scrollWidth === line.clientWidth)).toBe(true);
   await expect(page.locator("body")).toHaveCSS("background-color", "rgb(51, 65, 85)");
   await expect(page.locator("body")).toHaveCSS("color", "rgb(255, 244, 216)");
   expect(
@@ -202,12 +199,7 @@ for (const [device, median] of [
     page,
   }): Promise<void> => {
     if (device === "mobile") {
-      await page.addInitScript((): void => {
-        Object.defineProperty(navigator, "userAgentData", { value: undefined });
-        Object.defineProperty(navigator, "userAgent", {
-          value: "Mozilla/5.0 (iPhone; CPU iPhone OS)",
-        });
-      });
+      await page.setViewportSize({ width: 600, height: 700 });
     }
     await readLanding(page, 1234);
     const digits = page.getByTestId("milliseconds");
@@ -250,9 +242,7 @@ test("L5: missing timing displays a fallback without a comparison", async ({
 test("L9: a missing mobile benchmark displays only the measured time", async ({
   page,
 }): Promise<void> => {
-  await page.addInitScript((): void => {
-    Object.defineProperty(navigator, "userAgentData", { value: { mobile: true } });
-  });
+  await page.setViewportSize({ width: 600, height: 700 });
   await readLanding(page, 123.4, sample);
   await page.clock.runFor(1);
   await expect(page.getByText("This site loaded in 123 ms.")).toBeVisible();
