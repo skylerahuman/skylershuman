@@ -15,6 +15,16 @@ The page measures from navigation start to `loadEventStart`, matching [HTTP Arch
 
 `src/data/benchmark.json` pins October 2026. Each `counts` index is the lower bound in seconds of a one-second bucket; the values are the published [histogram volumes](https://cdn.httparchive.org/v1/static/reports/2026_10_01/ol.json), with missing buckets stored as zero. Only buckets whose lower bound exceeds the unrounded timing count as slower, so the displayed whole percent is a conservative lower bound. The multiplier is the largest whole factor for which the same buckets are still strictly slower; factors below 2× are omitted. Countdown starting values come from the corresponding published [p50 values](https://cdn.httparchive.org/v1/static/reports/ol.json), converted to milliseconds.
 
+## Deploy
+
+On pushes to `main`, GitHub Actions deploys Astro’s `dist/` to a Cloudflare Workers Static Assets site after the quality checks and tests pass. Pull requests run checks without deploying. `wrangler.toml` serves `skylershuman.com` directly from static files, with no Worker script.
+
+Before the first deploy:
+
+1. Make sure `skylershuman.com` is an active zone in the target Cloudflare account. The Worker custom domain manages DNS and TLS for that hostname; resolve any conflicting DNS record or existing custom domain before cutover.
+2. In GitHub **Settings → Secrets and variables → Actions**, set the `CLOUDFLARE_ACCOUNT_ID` repository variable and the `CLOUDFLARE_API_TOKEN` repository secret. Use Cloudflare’s **Edit Cloudflare Workers** token template, scoped to the target account and zone.
+3. Merge to `main` and check the deploy step in the `quality` workflow.
+
 ## Quality gate
 
 ```sh
@@ -35,7 +45,7 @@ src/components/   pure: props in, HTML out; scoped styles live here
 src/content/      Markdown you write (collections)
 src/data/         typed content data (nav, services, site)
 src/lib/          pure functions + tests; the only place that wraps astro:content
-worker/           Cloudflare Worker for /api/*
+wrangler.toml     Cloudflare Workers Static Assets configuration
 quality/          GritQL rules, fixtures, budget
 scripts/          the gate
 docs/             code style, decisions
