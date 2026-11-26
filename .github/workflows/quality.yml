@@ -41,9 +41,12 @@ jobs:
           fi
       - name: Deploy static assets to Cloudflare Workers
         if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/feature/load-time-landing')
-        uses: cloudflare/wrangler-action@v3
-        with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
-          wranglerVersion: "4.156.0"
-          command: ${{ github.ref == 'refs/heads/main' && 'deploy' || 'deploy --env preview' }}
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          args=()
+          if [[ "$GITHUB_REF" != refs/heads/main ]]; then
+            args+=(--env preview)
+          fi
+          npm exec --yes --package=wrangler@4.156.0 -- wrangler deploy "${args[@]}"
