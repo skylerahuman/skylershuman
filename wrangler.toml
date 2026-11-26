@@ -1,0 +1,14 @@
+name = "skylershuman"
+compatibility_date = "2026-10-30"
+workers_dev = false
+preview_urls = false
+routes = [{ pattern = "skylershuman.com", custom_domain = true }]
+
+[assets]
+directory = "./dist"
+
+[env.preview]
+name = "skylershuman-preview"
+workers_dev = true
+preview_urls = false
+routes = []

@@ -1,13 +1,36 @@
 # skylershuman.com
 
-Source for the consulting site at skylershuman.com. Static output, zero client-side JavaScript, served from Cloudflare's edge. Content lives in `src/content/` and `src/data/`; the engine is small on purpose (see `quality/budget.json`).
+Source for the consulting site at skylershuman.com. Astro builds a static landing page with one small browser script for Navigation Timing. No client-side framework, analytics, or benchmark requests.
+
+## Landing page
+
+```sh
+pnpm dev             # http://localhost:4321
+pnpm build           # static output in dist/
+pnpm exec playwright install chromium
+pnpm test            # Chromium acceptance tests
+```
+
+The page measures from navigation start to `loadEventStart`, matching [HTTP Archive's onLoad benchmark](https://httparchive.org/reports/loading-speed?start=2026_10_01#ol). The benchmark is a synthetic crawl, not a real-user distribution. The viewport width at load selects the mobile sample at 600 CSS pixels or less and the desktop sample above that. The layout responds to resizing and lets the comparison wrap instead of scrolling sideways.
+
+`src/data/benchmark.json` pins October 2026. Each `counts` index is the lower bound in seconds of a one-second bucket; the values are the published [histogram volumes](https://cdn.httparchive.org/v1/static/reports/2026_10_01/ol.json), with missing buckets stored as zero. Only buckets whose lower bound exceeds the unrounded timing count as slower, so the displayed whole percent is a conservative lower bound. The multiplier is the largest whole factor for which the same buckets are still strictly slower; factors below 2× are omitted. Countdown starting values come from the corresponding published [p50 values](https://cdn.httparchive.org/v1/static/reports/ol.json), converted to milliseconds.
+
+## Deploy
+
+On pushes to `main`, GitHub Actions deploys Astro’s `dist/` to a Cloudflare Workers Static Assets site after the quality checks and tests pass. Pushes to `feature/load-time-landing` deploy the same build to a separate `skylershuman-preview` Worker on `workers.dev` for speed testing. Pull request events run checks without deploying. `wrangler.toml` serves both deployments directly from static files, with no Worker script.
+
+Before the first deploy:
+
+1. Make sure `skylershuman.com` is an active zone in the target Cloudflare account. The Worker custom domain manages DNS and TLS for that hostname; resolve any conflicting DNS record or existing custom domain before cutover.
+2. In GitHub **Settings → Secrets and variables → Actions**, set the `CLOUDFLARE_ACCOUNT_ID` repository variable and the `CLOUDFLARE_API_TOKEN` repository secret. Use Cloudflare’s **Edit Cloudflare Workers** token template, scoped to the target account and zone.
+3. Merge to `main` and check the deploy step in the `quality` workflow.
 
 ## Quality gate
 
 ```sh
 pnpm install
 pnpm quality          # biome ci + comment gate + size budget (what CI runs)
-pnpm quality:selftest # proves every rule fires and the clean fixture passes
+pnpm quality:selftest # checks gate fixtures and Pi review behavior
 lefthook install      # fast checks on commit, full gate on push
 ```
 
@@ -22,7 +45,7 @@ src/components/   pure: props in, HTML out; scoped styles live here
 src/content/      Markdown you write (collections)
 src/data/         typed content data (nav, services, site)
 src/lib/          pure functions + tests; the only place that wraps astro:content
-worker/           Cloudflare Worker for /api/*
+wrangler.toml     Cloudflare Workers Static Assets configuration
 quality/          GritQL rules, fixtures, budget
 scripts/          the gate
 docs/             code style, decisions
@@ -30,4 +53,4 @@ docs/             code style, decisions
 
 ## Workflow
 
-Branch → PR → `pnpm quality` green → human review → squash merge. AI-assisted commits carry `Assisted-by: <model>`.
+Start feature work with `/skill:feature` in Pi. Stage-specific instructions live in `AGENTS/` and are read on demand. In a trusted Pi session, run `/review` to walk the committed PR diff before you squash-merge it. The review stays in Pi; GitHub does not enforce it. AI-assisted commits carry `Assisted-by: <model>`.

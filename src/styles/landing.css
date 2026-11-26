@@ -1,0 +1,84 @@
+body {
+  min-height: 100svh;
+  margin: 0;
+  display: grid;
+  place-items: center;
+  background-color: #334155;
+  color: #fff4d8;
+  font-family: system-ui, sans-serif;
+}
+
+main {
+  width: 100%;
+  min-width: 0;
+  font-size: clamp(0.75rem, 2vw, 1rem);
+  line-height: 1.4;
+}
+
+p {
+  box-sizing: border-box;
+  width: max-content;
+  max-width: 100%;
+  margin: 0 auto;
+  padding: 0.5rem 1rem;
+  text-align: center;
+}
+
+@media (max-width: 600px) {
+  #measurement {
+    padding-inline: 0.25rem;
+    letter-spacing: -0.015em;
+  }
+
+  #comparison:not([hidden]) {
+    display: block;
+    margin-block-start: 0.35em;
+  }
+}
+
+strong,
+a {
+  color: inherit;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  text-decoration: none;
+}
+
+.lined {
+  position: relative;
+}
+
+.lined::after {
+  position: absolute;
+  inset-inline: 0;
+  inset-block-end: 0;
+  border-bottom: 2px solid currentColor;
+  content: "";
+}
+
+.number-slot {
+  display: inline-grid;
+  vertical-align: bottom;
+}
+
+.number-slot::before,
+.number-slot > span {
+  grid-area: 1 / 1;
+}
+
+.number-slot > span {
+  justify-self: end;
+}
+
+.multiplier-slot > span {
+  justify-self: center;
+}
+
+.number-slot::before {
+  content: attr(data-reserve);
+  visibility: hidden;
+}
+
+#digits span {
+  display: inline-block;
+}

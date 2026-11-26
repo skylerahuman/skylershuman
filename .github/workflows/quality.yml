@@ -3,10 +3,14 @@ name: quality
 on:
   pull_request:
   push:
-    branches: [main]
+    branches: [main, feature/load-time-landing]
 
 permissions:
   contents: read
+
+concurrency:
+  group: quality-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   quality:
@@ -23,6 +27,9 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm quality
       - run: pnpm quality:selftest
+      - run: pnpm build
+      - run: pnpm exec playwright install --with-deps chromium
+      - run: pnpm test
       - name: Budget changes need a decision record
         run: |
           base="${{ github.event.pull_request.base.sha || github.event.before }}"
@@ -32,3 +39,14 @@ jobs:
               exit 1
             fi
           fi
+      - name: Deploy static assets to Cloudflare Workers
+        if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/feature/load-time-landing')
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          args=()
+          if [[ "$GITHUB_REF" != refs/heads/main ]]; then
+            args+=(--env preview)
+          fi
+          npm exec --yes --package=wrangler@4.156.0 -- wrangler deploy "${args[@]}"
